@@ -15,7 +15,7 @@ Using the Regular POST type you will have to follow the most common approach.
 Sending a single document
 ```http
 POST /api-name/api-version/user-token
-Authorization: YourAuthorizationHeaderContent
+Authorization: YourAuthorizationCode
 Content-Type: application/json
 
 {"your":"single doc","b":true,"n":1}
@@ -45,7 +45,7 @@ Connection: close
 Sending multiple documents
 ```http
 POST /api-name/api-version/user-token
-Authorization: YourAuthorizationHeaderContent
+Authorization: YourAuthorizationCode
 Content-Type: application/json
 
 [
@@ -88,7 +88,7 @@ as its first line and the real body, the document or documents, come right after
 POST /blob/api-name/api-version/user-token
 Content-Type: text/plain
 
-YourAuthorizationHeaderContent
+YourAuthorizationCode
 [
     {"your":"doc A","b":true,"n":1},
     {"your":"doc B","b":false,"n":2}
@@ -99,7 +99,7 @@ OR
 POST /blob/api-name/api-version/user-token
 Content-Type: text/plain
 
-YourAuthorizationHeaderContent\n[{"your":"doc A","b":true,"n":1},{"your":"doc B","b":false,"n":2}]
+YourAuthorizationCode\n[{"your":"doc A","b":true,"n":1},{"your":"doc B","b":false,"n":2}]
 ```
 
 The Response is the same as if it were sent with the Regular approach:
@@ -128,19 +128,44 @@ The AMP approach is meant to be used by AMP web pages that have several limitati
 
 The usage here is by setting the ```Content-Type``` header as ```application/json```, which occurs naturally in AMP pages and setting no ```Authorization``` header.
 
-In this case the ```Authorization``` header's content is part of the body of the body of 
-the POST request which **must be an Array with exactly 2 elements**
+In this case the ```Authorization``` header's content is part of the body of 
+the POST request which can be either an object with the properties **auth:string** and **data:[object|Array]**
+or **an Array with exactly 2 elements**
 
-1. The authorization header content
-1. The document or documents intended to be saved
+Posting the object format
+```json
+{"auth":"YourAuthorizationCode","data":{"your":"doc A","b":true,"n":1}}
+// OR
+{"auth":"YourAuthorizationCode","data":[{"your":"doc A","b":false,"n":1},{"your":"doc B","b":false,"n":2}]}
+```
+
+Posting the array format
+```json
+["YourAuthorizationCode",{"your":"doc A","b":true,"n":1}]
+// OR
+["YourAuthorizationCode", [{"your":"doc A","b":false,"n":1},{"your":"doc B","b":false,"n":2}] ]
+```
 
 The AMP approach goes as follows
 ```http
 POST /amp/api-name/api-version/user-token
 Content-Type: application/json
 
+{
+    "auth":"YourAuthorizationCode",
+    "data":[
+        {"your":"doc A","b":true,"n":1},
+        {"your":"doc B","b":false,"n":2}
+    ]
+}
+```
+OR
+```http
+POST /amp/api-name/api-version/user-token
+Content-Type: application/json
+
 [
-    "YourAuthorizationHeaderContent",
+    "YourAuthorizationCode",
     [
         {"your":"doc A","b":true,"n":1},
         {"your":"doc B","b":false,"n":2}
